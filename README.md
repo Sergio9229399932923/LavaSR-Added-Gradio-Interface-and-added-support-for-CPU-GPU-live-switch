@@ -32,116 +32,69 @@ https://github.com/user-attachments/assets/1d11ae30-cb19-4c9b-ac46-52adbcac957f
 * Restoring datasets: LavaSR can enhance audio quality of any audio dataset.
 
 
-### Comparisons
 
-Quality comparisons using Log-Spectral-distance on VCTK validation. Lower is better(more similar to original 48khz file).
-| Method              | 8→48 kHz | 16→48 kHz | 24→48 kHz |
-|--------------------|----------------|-----------------|-----------------|
-| Sinc upsampling     | 2.98           | 2.75            | 2.17            |
-| AudioSR (diffusion) | 1.13           | 0.98            | 0.82            |
-| NU-WAVE2(diffusion) | 1.10           | 0.94            | 0.87            |
-| AP-BWE(previous best) | 0.86           | 0.74            | 0.64            |
-| **Proposed model**  | **0.85**       | **0.72**        | **0.63**        |
+LavaSR Audio Enhancer - Setup Guide for Windows
 
-Speed Comparisons were done on A100 gpu. Higher realtime means faster processing speeds.
 
-| Model         | Speed (Real-Time) | Model Size |
-| :------------ | :---------------- | :--------- |
-| **LavaSR** | **5000x realtime** | **~50 MB** |
-| AP-BWE      | 300x realtime        | ~70 MB     |
-| FlowHigh      | 80x realtime        | ~450 MB     |
-| FlashSR       | 14x realtime        | ~1000 MB     |
-| AudioSR       | 0.6x realtime    | ~6000 MB     |
+1. ACTIVATE VIRTUAL ENVIRONMENT
+   ------------------------------
+   cd C:\LavaSR
+   
+   .venv\Scripts\activate
 
-## Usage
-You can try it locally, colab, or spaces.
+   
+3. INSTALL DEPENDENCIES
+   ---------------------
+   pip install git+https://github.com/ysharma3501/LavaSR.git
+   
+   pip install gradio soundfile
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17wzpZ1nH_BrDsSfZ0JiZNdf4OH-zsfs2?usp=sharing)
-[![Open in Spaces](https://huggingface.co/datasets/huggingface/badges/resolve/main/open-in-hf-spaces-sm.svg)](https://huggingface.co/spaces/YatharthS/LavaSR)
 
-#### Simple 1 line installation:
-```
-uv pip install git+https://github.com/ysharma3501/LavaSR.git
-```
+5. (OPTIONAL) ENABLE CUDA FOR NVIDIA GPU
+   --------------------------------------
+   Only if you have an NVIDIA GPU and want faster processing:
 
-#### Load model:
-```python
-from LavaSR.model import LavaEnhance2 
+   a) Check CUDA availability:
+      nvidia-smi
 
-## change device to your torch device type(cuda, mps, etc.)
-device = 'cpu'
-lava_model = LavaEnhance2("YatharthS/LavaSR", device)
-```
+   b) Reinstall PyTorch with CUDA support:
+      pip uninstall torch torchvision torchaudio -y
+      pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 
-#### Simple inference
-```python
-import soundfile as sf
-from IPython.display import Audio
+      (Replace cu124 with your CUDA version: cu118, cu121, cu124, etc.)
 
-input_audio, input_sr = lava_model.load_audio('input.wav')
 
-## Enhance Audio
-output_audio = lava_model.enhance(input_audio).cpu().numpy().squeeze()
+6. RUN THE INTERFACE
+   ------------------
+   python interface.py
 
-## Save Audio(both input and output)
-sf.write('input.wav', input_audio.cpu().numpy().squeeze(), 16000)
-sf.write('output.wav', output_audio, 48000)
-```
+   Then open your browser to: http://127.0.0.1:7860
 
-#### Advanced inference
-```python
-import soundfile as sf
-from IPython.display import Audio
 
-cutoff = None ## Default is roughly half your sampling rate. You can lower it for higher quality but might sound "metallic".
-input_sr = 16000 ## Change to any sr you want(from 8khz-48khz).
-denoise = False ## Change this to True only if your audio has noise you want to filter.
-batch = False ## Change this to True if audio is very long.
 
-## Load Audio
-input_audio, input_sr = lava_model.load_audio('input.wav', input_sr=input_sr)
+USAGE
 
-## Enhance Audio
-output_audio = lava_model.enhance(input_audio, denoise=denoise, batch=batch).cpu().numpy().squeeze()
 
-## Save Audio(both input and output)
-sf.write('input.wav', input_audio.cpu().numpy().squeeze(), 16000)
-sf.write('output.wav', output_audio, 48000)
-```
+1. Upload an audio file (or record via microphone)
+2. Select device: cpu, cuda (NVIDIA), or mps (Apple Silicon)
+3. Adjust sample rate (8000-48000 Hz)
+4. Toggle Denoise if audio has background noise
+5. Toggle Batch Mode for very long audio files
+6. Click "Enhance Audio"
+7. Download the enhanced output
 
-## Info
 
-Q: How is this novel?
 
-A: It adapts Vocos based architecture for BWE(bandwidth extension/audio upsampling). We also propose linkwitz-riley inspired refiner to further significantly increase quality.
+TROUBLESHOOTING
 
-Q: How is it so fast?
 
-A: Because it uses the Vocos architecture which is isotropic and single pass, it's much faster then time-domain based and diffusion based models.
+- "Torch not compiled with CUDA enabled" 
+  -> Install PyTorch with CUDA (see step 3)
 
-Q: What is it trained on?
+- ModuleNotFoundError: No module named 'gradio'
+  -> Run: pip install gradio
 
-A: It starts off from a Vocos prior and trained with just 50k steps on VCTK dataset. Dataset is randomly resampled to 8khz/16khz/24khz and randomly noise is added.
-## Roadmap
 
-- [x] Release model and code
-- [x] Huggingface spaces demo
-- [x] Release model with no metallic issue.
-- [ ] Release training code
-- [ ] Release model trained on music and audio
-
-## Acknowledgments
-
-- [Vocos](https://github.com/gemelo-ai/vocos.git) for their excellant architecture.
-- [UL-UNAS](https://github.com/Xiaobin-Rong/ul-unas.git) for their great denoiser model.
-
-## Final Notes
-
-Currently writing an Interspeech paper for LavaSR, receiving feedback from community would be great.
-
-The model and code are licensed under the Apache-2.0 license. See LICENSE for details.
 
 Stars/Likes would be appreciated, thank you.
-
-Email: yatharthsharma3501@gmail.com
   

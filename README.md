@@ -49,6 +49,8 @@ LavaSR Audio Enhancer - Setup Guide for Windows
    
    pip install gradio soundfile
 
+   download interface.py
+
 
 5. (OPTIONAL) ENABLE CUDA FOR NVIDIA GPU
    --------------------------------------
